@@ -2,14 +2,15 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
-const Login = () => {
+export default function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { username, password });
+    console.log('Signup attempt:', { username, password });
   };
 
   return (
@@ -30,9 +31,9 @@ const Login = () => {
           <p className="text-gray-400">Rate movies, share reviews with friends</p>
         </div>
 
-        {/* Login Form */}
+        {/* Signup Form */}
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Username
@@ -65,26 +66,18 @@ const Login = () => {
               type="submit"
               className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             >
-              Log In
+              Sign Up
             </button>
           </form>
-
-          <div className="text-center mt-6">
-            <a href="#" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
-              Forgot password?
-            </a>
-          </div>
         </div>
 
         <div className="text-center mt-6">
-          <span className="text-gray-400">Don&apos;t have an account? </span>
-          <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
-            Sign up
-          </a>
+          <span className="text-gray-400">Do you have an account? </span>
+          <Link href="/" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+            Login
+          </Link>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
