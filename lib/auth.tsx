@@ -26,14 +26,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in when app loads
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
+    // Check if we're in the browser first
+    if (typeof window !== 'undefined') {
       try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        // Only parse if userData exists and is not null/undefined
+        if (token && userData && userData !== 'undefined' && userData !== 'null') {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
       } catch (error) {
         console.error('Error parsing user data:', error);
         // Clear invalid data
@@ -46,15 +49,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const value = {

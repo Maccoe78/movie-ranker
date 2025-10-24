@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useAuth } from '@/lib/auth';
 
 interface NavItem {
   label: string;
@@ -15,6 +15,8 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }) => {
+  const { user, logout } = useAuth();
+
   const navItems: NavItem[] = [
     {
       label: 'Browse Movies',
@@ -54,6 +56,16 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }
     }
   ];
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/'; // Redirect to login
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = (username: string) => {
+    return username.slice(0, 2).toUpperCase();
+  };
+
   return (
     <div className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,12 +99,44 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }
           </nav>
 
           {/* User Profile */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">JD</span>
+          <div className="relative group">
+            <div className="flex items-center space-x-2 cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {user ? getUserInitials(user.username) : 'GU'}
+                </span>
               </div>
-              <span className="hidden sm:block text-sm text-gray-300">John Doe</span>
+              <span className="hidden sm:block text-sm text-gray-300">
+                {user ? user.username : 'Guest User'}
+              </span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {/* Dropdown Menu */}
+            <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="py-1">
+                <Link
+                  href="/profile"
+                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  My Profile
+                </Link>
+                <Link
+                  href="/settings"
+                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  Settings
+                </Link>
+                <hr className="border-gray-700 my-1" />
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </div>
