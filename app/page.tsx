@@ -3,14 +3,39 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { username, password });
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await apiClient.login({
+        username,
+        password,
+      });
+
+      console.log('Login successful:', response);
+      
+      // Store token
+      localStorage.setItem('token', response.token);
+      
+      // Redirect to dashboard or movies page
+      window.location.href = '/Movies'; // or use Next.js router
+
+    } catch (err) {
+      console.error('Login failed:', err);
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,6 +70,7 @@ export default function LoginPage() {
                 placeholder="Enter your username"
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -59,14 +85,16 @@ export default function LoginPage() {
                 placeholder="Enter your password"
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 required
+                disabled={isLoading}
               />
             </div>
 
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             >
-              Log In
+              {isLoading ? 'Logging In...' : 'Log In'}
             </button>
           </form>
 
