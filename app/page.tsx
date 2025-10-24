@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +26,8 @@ export default function LoginPage() {
 
       console.log('Login successful:', response);
       
-      // Store token
-      localStorage.setItem('token', response.token);
+      // Use the auth context instead of direct localStorage
+      login(response.token, response.user);
       
       // Redirect to dashboard or movies page
       window.location.href = '/Movies'; // or use Next.js router
