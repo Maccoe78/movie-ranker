@@ -55,10 +55,18 @@ export class ApiClient {
   }
 
   async login(data: LoginRequest): Promise<AuthResponse> {
-    return this.request<AuthResponse>('/api/auth/login', {
+    const response = await this.request<any>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+
+    return {
+        token: response.token,
+        user: {
+            id: response.user?.id,
+            username: response.username || response.user?.username,
+        }
+    }
   }
 }
 
