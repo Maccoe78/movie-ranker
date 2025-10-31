@@ -60,7 +60,7 @@ export class ApiClient {
   }
 
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await this.request<any>('/api/auth/login', {
+    const response = await this.request<{ message: string; username: string; token?: string }>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -69,7 +69,7 @@ export class ApiClient {
 
     // Je backend geeft alleen username terug, geen ID
     // We moeten de user ID ophalen via de username endpoint
-    let username = response.username;
+    const username = response.username;
     
     if (!username) {
       throw new Error('Login response does not contain username');
@@ -77,7 +77,7 @@ export class ApiClient {
 
     // Haal user details op inclusief ID
     try {
-      const userDetails = await this.request<any>(`/api/auth/users/username/${username}`, {
+      const userDetails = await this.request<{ id: number; username: string; password: string }>(`/api/auth/users/username/${username}`, {
         method: 'GET',
       });
 

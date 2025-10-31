@@ -60,6 +60,11 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          {error && (
+            <div className="mb-4 bg-red-800 border border-red-600 text-red-100 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">

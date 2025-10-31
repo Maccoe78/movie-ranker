@@ -88,9 +88,9 @@ export default function ProfilePage() {
             });
             setIsEditing(false);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Update failed:', error);
-            setSaveError(error.message || 'Failed to update account. Please try again.');
+            setSaveError(error instanceof Error ? error.message : 'Failed to update account. Please try again.');
         } finally {
             setSaveLoading(false);
         }
@@ -262,7 +262,7 @@ export default function ProfilePage() {
                                     }`}
                                     required
                                 />
-                                {!isEditing && <p className="text-xs text-gray-500 mt-1">Click "Edit Profile" to change</p>}
+                                {!isEditing && <p className="text-xs text-gray-500 mt-1">Click &quot;Edit Profile&quot; to change</p>}
                             </div>
                             
                             <div>
@@ -278,7 +278,7 @@ export default function ProfilePage() {
                                     }`}
                                     minLength={6}
                                 />
-                                {!isEditing && <p className="text-xs text-gray-500 mt-1">Click "Edit Profile" to change</p>}
+                                {!isEditing && <p className="text-xs text-gray-500 mt-1">Click &quot;Edit Profile&quot; to change</p>}
                             </div>
                         </div>
 

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 
 interface NavItem {
@@ -64,7 +65,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }
           {/* Logo */}
           <Link href="/Movies" className="flex items-center space-x-2">
             <div className="w-10 h-10 relative">
-              <img
+              <Image
                 src="/MovieRate-logo.png"
                 alt="MovieRate Logo"
                 width={40}
