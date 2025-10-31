@@ -65,6 +65,8 @@ export default function ProfilePage() {
             }
 
             console.log('Updating user with:', updateData);
+            console.log('Current user object:', user);
+            console.log('User ID:', user!.id);
 
             // Call the API
             const response = await apiClient.updateUser(user!.id, updateData);

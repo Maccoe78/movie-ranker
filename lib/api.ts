@@ -65,19 +65,48 @@ export class ApiClient {
       body: JSON.stringify(data),
     });
 
-    return {
-        token: response.token,
+    console.log('Login response from backend:', response);
+
+    // Je backend geeft alleen username terug, geen ID
+    // We moeten de user ID ophalen via de username endpoint
+    let username = response.username;
+    
+    if (!username) {
+      throw new Error('Login response does not contain username');
+    }
+
+    // Haal user details op inclusief ID
+    try {
+      const userDetails = await this.request<any>(`/api/auth/users/username/${username}`, {
+        method: 'GET',
+      });
+
+      console.log('User details from backend:', userDetails);
+
+      return {
+        token: response.token || 'dummy-token', // Je backend geeft geen token terug
         user: {
-            id: response.user?.id,
-            username: response.username || response.user?.username,
+          id: userDetails.id,
+          username: userDetails.username,
         }
+      };
+    } catch (error) {
+      console.error('Failed to get user details:', error);
+      throw new Error('Failed to get complete user information after login');
     }
   }
 
   async updateUser(userId: number, data: UpdateUserRequest): Promise<{ message: string; username: string }> {
-    return this.request<{ message: string; username: string }>(`/auth/users/${userId}`, {
+    if (!userId || userId === undefined || userId === null) {
+      throw new Error('Invalid user ID. Please log in again.');
+    }
+
+    console.log('Making updateUser request to:', `/api/auth/users/${userId}`);
+    
+    // Je backend verwacht een User object zonder extra 'id' field
+    return this.request<{ message: string; username: string }>(`/api/auth/users/${userId}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data), // Stuur alleen username en/of password
     });
   }
 
