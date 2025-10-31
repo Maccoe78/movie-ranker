@@ -28,15 +28,6 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }
       )
     },
     {
-      label: 'Search',
-      href: '/search',
-      icon: (
-        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      )
-    },
-    {
       label: 'Friends',
       href: '/friends',
       icon: (
@@ -72,10 +63,14 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage = 'Browse Movies' }
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/Movies" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-              </svg>
+            <div className="w-10 h-10 relative">
+              <img
+                src="/MovieRate-logo.png"
+                alt="MovieRate Logo"
+                width={40}
+                height={40}
+                className="rounded-lg object-cover"
+              />
             </div>
             <span className="text-xl font-bold text-white">MovieRate</span>
           </Link>

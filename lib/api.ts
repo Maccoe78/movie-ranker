@@ -10,6 +10,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface UpdateUserRequest {
+  username?: string;
+  password?: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: {
@@ -68,6 +73,14 @@ export class ApiClient {
         }
     }
   }
+
+  async updateUser(userId: number, data: UpdateUserRequest): Promise<{ message: string; username: string }> {
+    return this.request<{ message: string; username: string }>(`/auth/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();
