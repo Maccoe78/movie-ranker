@@ -23,6 +23,16 @@ export interface AuthResponse {
   };
 }
 
+export interface Movie {
+  id: number;
+  name: string;
+  releaseYear: number;
+  description: string;
+  durationMinutes: number;
+  genres: string[];
+  posterUrl?: string;
+}
+
 export class ApiClient {
   private baseUrl: string;
 
@@ -67,15 +77,13 @@ export class ApiClient {
 
     console.log('Login response from backend:', response);
 
-    // Je backend geeft alleen username terug, geen ID
-    // We moeten de user ID ophalen via de username endpoint
     const username = response.username;
     
     if (!username) {
       throw new Error('Login response does not contain username');
     }
 
-    // Haal user details op inclusief ID
+  
     try {
       const userDetails = await this.request<{ id: number; username: string; password: string }>(`/api/auth/users/username/${username}`, {
         method: 'GET',
@@ -84,7 +92,7 @@ export class ApiClient {
       console.log('User details from backend:', userDetails);
 
       return {
-        token: response.token || 'dummy-token', // Je backend geeft geen token terug
+        token: response.token || 'dummy-token', 
         user: {
           id: userDetails.id,
           username: userDetails.username,
@@ -103,11 +111,36 @@ export class ApiClient {
 
     console.log('Making updateUser request to:', `/api/auth/users/${userId}`);
     
-    // Je backend verwacht een User object zonder extra 'id' field
     return this.request<{ message: string; username: string }>(`/api/auth/users/${userId}`, {
       method: 'PUT',
-      body: JSON.stringify(data), // Stuur alleen username en/of password
+      body: JSON.stringify(data), 
     });
+  }
+
+  // Movie methods
+  async getMovies(): Promise<Movie[]> {
+    console.log('Fetching all movies...');
+    return this.request<Movie[]>('/api/movies');
+  }
+
+  async getMovieById(id: number): Promise<Movie> {
+    console.log('Fetching movie by ID:', id);
+    return this.request<Movie>(`/api/movies/${id}`);
+  }
+
+  async searchMovies(query: string): Promise<Movie[]> {
+    console.log('Searching movies with query:', query);
+    return this.request<Movie[]>(`/api/movies/search?name=${encodeURIComponent(query)}`);
+  }
+
+  async getMoviesByYear(year: number): Promise<Movie[]> {
+    console.log('Fetching movies by year:', year);
+    return this.request<Movie[]>(`/api/movies/year/${year}`);
+  }
+
+  async getMoviesByGenre(genre: string): Promise<Movie[]> {
+    console.log('Fetching movies by genre:', genre);
+    return this.request<Movie[]>(`/api/movies/genre/${encodeURIComponent(genre)}`);
   }
 
 }
