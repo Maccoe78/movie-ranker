@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Movie } from '@/types/movie';
 import { apiClient } from '@/lib/api';
@@ -10,12 +10,41 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
+interface Rating {
+  id: number;
+  userId: number;
+  movieId: number;
+  userName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
 const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
   const { user } = useAuth();
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [loadingRatings, setLoadingRatings] = useState(false);
+
+useEffect(() => {
+   if (movie?.id) {
+    const fetchRatings = async () => {
+      setLoadingRatings(true);
+      try {
+        const ratingData = await apiClient.getMovieRatings(movie.id);
+        setRatings(ratingData.ratings || []);
+      } catch (error) {
+        console.error('Error fetching ratings:', error);
+      } finally {
+        setLoadingRatings(false);
+      }
+    };
+    fetchRatings();
+   }
+}, [movie?.id]);
 
   if (!isOpen || !movie) return null;
 
@@ -24,8 +53,6 @@ const handleSubmitRating = async () => {
     alert('Please select a rating');
     return;
   }
-
-  const userId = user?.id;
 
   if (!user) {
     alert('Please log in to rate movies');
@@ -44,6 +71,8 @@ const handleSubmitRating = async () => {
     setShowRatingForm(false);
     setRating(0);
     setComment('');
+    const updatedRatings = await apiClient.getMovieRatings(movie.id);
+    setRatings(updatedRatings.ratings || []);
   } catch (error) {
     console.error('Error submitting rating:', error);
     alert('Failed to submit rating');
@@ -52,8 +81,8 @@ const handleSubmitRating = async () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+      <div className="bg-gray-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+        {/* Header */ }
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <h2 className="text-2xl font-bold text-white">{movie.name || 'Unknown Title'}</h2>
           <button
@@ -67,7 +96,7 @@ const handleSubmitRating = async () => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Poster */}
             <div className="md:col-span-1">
@@ -142,7 +171,7 @@ const handleSubmitRating = async () => {
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
-                        className="text-3xl"
+                        className="text-3xl w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform"
                         >
                           {(hoverRating || rating) >= star ? '⭐' : '☆'}
                         </button>
@@ -173,6 +202,54 @@ const handleSubmitRating = async () => {
                     </div>
                 </div>
               )}
+              
+              {/* All Reviews */}
+              <div className="mb-6 mt-8">
+                <h3 className="text-lg font-semibold text-white mb-3">
+                  All Reviews ({ratings.length})
+                </h3>
+              {loadingRatings ? (
+                <p className="text-gray-400">Loading reviews...</p>
+              ): ratings.length === 0 ? (
+                <p className="text-gray-400">No reviews yet.</p>
+              ): (
+                <div className="space-y-4">
+                  {ratings.map((rating) => (
+                    <div key={rating.id} className="bg-gray-700 rounded-lg p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold">
+                          {rating.userName.charAt(0).toUpperCase()}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-white font-medium">{rating.userName}</h4>
+                            <span className="text-sm text-gray-400">
+                              {rating.createdAt
+                                ? new Date(rating.createdAt).toLocaleDateString()
+                                : 'No Date'
+                              }
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span key={star} className="text-purple-500 text-sm">
+                                {star <= rating.rating ? '⭐' : '☆'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {rating.comment && (
+                        <p className="text-gray-300 text-sm mt-2">{rating.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              </div>
             </div>
           </div>
         </div>

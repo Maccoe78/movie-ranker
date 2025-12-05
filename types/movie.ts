@@ -6,4 +6,8 @@ export interface Movie {
   durationMinutes: number;
   genres: string[];
   posterUrl?: string;
+  averageRating?: number;
+  totalRatings?: number;
+  createdAt?: number[];
+  updatedAt?: number[] | null;
 }

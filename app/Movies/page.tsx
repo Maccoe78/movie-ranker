@@ -6,6 +6,7 @@ import MovieCard from '@/components/MovieCard';
 import MovieModal from '@/components/MovieModal';
 import { Movie } from '@/types/movie';
 import { movieService } from '@/lib/movieService';
+import { apiClient } from '@/lib/api';
 
 export default function MoviesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +21,22 @@ export default function MoviesPage() {
       try {
         setLoading(true);
         const fetchedMovies = await movieService.getMovies();
-        setMovies(fetchedMovies);
+        const movieswithRatings = await Promise.all(
+          fetchedMovies.map(async (movie) => {
+            try {
+              const ratingData = await apiClient.getMovieRatings(movie.id);
+              return {
+                ...movie,
+                averageRating: ratingData.averageRating || 0,
+                totalRatings: ratingData.totalRatings || 0,
+
+              };
+            } catch {
+              return { ...movie, averageRating: 0, totalRatings: 0};
+            }
+          })
+        )
+        setMovies(movieswithRatings);
       } catch (err) {
         setError('Failed to load movies');
         console.error('Error fetching movies:', err);
