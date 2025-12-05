@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Movie } from '@/types/movie';
+import { apiClient } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 
 interface MovieModalProps {
   movie: Movie | null;
@@ -9,7 +11,44 @@ interface MovieModalProps {
 }
 
 const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [hoverRating, setHoverRating] = useState(0);
+  const { user } = useAuth();
+
   if (!isOpen || !movie) return null;
+
+const handleSubmitRating = async () => {
+  if (rating === 0) {
+    alert('Please select a rating');
+    return;
+  }
+
+  const userId = user?.id;
+
+  if (!user) {
+    alert('Please log in to rate movies');
+    return;
+  }
+
+  try {
+    await apiClient.addOrUpdateRating({
+      userId: user.id,
+      movieId: movie.id,
+      rating,
+      comment: comment || undefined,
+    });
+
+    alert('Rating submitted successfully!');
+    setShowRatingForm(false);
+    setRating(0);
+    setComment('');
+  } catch (error) {
+    console.error('Error submitting rating:', error);
+    alert('Failed to submit rating');
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -87,19 +126,53 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
                 </p>
               </div>
 
-              {/* Rating & Review Section */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Your Rating & Review</h3>
-                <button className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg text-white font-medium transition-colors">
+              {!showRatingForm ? (
+                <button
+                  onClick={() => setShowRatingForm(true)}
+                  className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg text-white font-medium transition-colors"
+                >
                   Rate & Review This Movie
                 </button>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="text-3xl"
+                        >
+                          {(hoverRating || rating) >= star ? '⭐' : '☆'}
+                        </button>
+                    ))}
+                  </div>
 
-              {/* Reviews from Friends */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Reviews from Friends</h3>
-                <p className="text-gray-400">No reviews yet from your friends.</p>
-              </div>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Write your review (optional)..."
+                    maxLength={1000}
+                    className="w-full bg-gray-700 text-white rounded-lg p-3 min-h-[100px]"
+                    />
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSubmitRating}
+                        className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg text-white"
+                        >
+                          Submit Rating
+                        </button>
+                        <button
+                          onClick={() => { setShowRatingForm(false); setRating(0); setComment(''); }}
+                          className="bg-gray-600 hover:bg-gray-700 px-6 py-2 rounded-lg text-white"
+                        >
+                          Cancel
+                        </button>
+                    </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
