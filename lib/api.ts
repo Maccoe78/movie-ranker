@@ -143,6 +143,28 @@ export class ApiClient {
     return this.request<Movie[]>(`/api/movies/genre/${encodeURIComponent(genre)}`);
   }
 
+  // Rating methods
+  async addOrUpdateRating(data: {userId: number; movieId: number; rating: number; comment?: string}) {
+    return this.request('/api/ratings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getMovieRatings(movieId: number) {
+    return this.request(`/api/ratings/movie/${movieId}`);
+  }
+
+  async getUserMovieRating(userId: number, movieId: number) {
+    return this.request(`/api/ratings/user/${userId}/movie/${movieId}`);
+  }
+
+  async deleteRating(ratingId: number) {
+    return this.request(`/api/ratings/${ratingId}`, {
+      method: 'DELETE',
+    });
+  }
+
 }
 
 export const apiClient = new ApiClient();
