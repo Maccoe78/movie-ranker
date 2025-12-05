@@ -144,7 +144,7 @@ export class ApiClient {
   }
 
   // Rating methods
-  async addOrUpdateRating(data: {userId: number; movieId: number; rating: number; comment?: string}) {
+  async addOrUpdateRating(data: {userId: number; movieId: number; rating: number; comment?: string}): Promise<any> {
     return this.request('/api/ratings', {
       method: 'POST',
       body: JSON.stringify(data),

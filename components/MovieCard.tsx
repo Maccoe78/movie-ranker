@@ -59,6 +59,18 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick }) => {
             )}
           </div>
         )}
+        
+        {/* Rating Display */}
+        {movie.averageRating !== undefined && movie.averageRating > 0 && (
+          <div className="mt-3 flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star} className="text-purple-500">
+                {star <= Math.round(movie.averageRating!) ? '⭐' : '☆'}
+              </span>
+            ))}
+            <span className="ml-2 text-sm text-gray-400">{movie.averageRating.toFixed(1)}</span>
+          </div>
+        )}
       </div>
     </div>
   );
