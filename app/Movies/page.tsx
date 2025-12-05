@@ -24,14 +24,14 @@ export default function MoviesPage() {
         const movieswithRatings = await Promise.all(
           fetchedMovies.map(async (movie) => {
             try {
-              const ratingData = await apiClient.getMovieRatings(movie.id) as { averageRating: number; totalRatings: number};
+              const ratingData = await apiClient.getMovieRatings(movie.id);
               return {
                 ...movie,
                 averageRating: ratingData.averageRating || 0,
                 totalRatings: ratingData.totalRatings || 0,
 
               };
-            } catch (error) {
+            } catch {
               return { ...movie, averageRating: 0, totalRatings: 0};
             }
           })

@@ -20,23 +20,13 @@ interface Rating {
   createdAt: string;
 }
 
-function parseLocalDateTime(dateString: string | null | undefined): Date | null {
-  if (!dateString) return null;
-
-  try{
-    return new Date(dateString);
-  } catch {
-    return null;
-  }
-}
-
 const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
   const { user } = useAuth();
-  const [ratings, setRatings] = useState<any[]>([]);
+  const [ratings, setRatings] = useState<Rating[]>([]);
   const [loadingRatings, setLoadingRatings] = useState(false);
 
 useEffect(() => {
@@ -44,7 +34,7 @@ useEffect(() => {
     const fetchRatings = async () => {
       setLoadingRatings(true);
       try {
-        const ratingData = await apiClient.getMovieRatings(movie.id) as any;
+        const ratingData = await apiClient.getMovieRatings(movie.id);
         setRatings(ratingData.ratings || []);
       } catch (error) {
         console.error('Error fetching ratings:', error);
@@ -64,8 +54,6 @@ const handleSubmitRating = async () => {
     return;
   }
 
-  const userId = user?.id;
-
   if (!user) {
     alert('Please log in to rate movies');
     return;
@@ -83,7 +71,7 @@ const handleSubmitRating = async () => {
     setShowRatingForm(false);
     setRating(0);
     setComment('');
-    const updatedRatings = await apiClient.getMovieRatings(movie.id) as any;
+    const updatedRatings = await apiClient.getMovieRatings(movie.id);
     setRatings(updatedRatings.ratings || []);
   } catch (error) {
     console.error('Error submitting rating:', error);

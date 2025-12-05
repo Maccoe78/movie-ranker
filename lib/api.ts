@@ -144,22 +144,22 @@ export class ApiClient {
   }
 
   // Rating methods
-  async addOrUpdateRating(data: {userId: number; movieId: number; rating: number; comment?: string}): Promise<any> {
+  async addOrUpdateRating(data: {userId: number; movieId: number; rating: number; comment?: string}): Promise<{ id: number; userId: number; movieId: number; rating: number; comment?: string }> {
     return this.request('/api/ratings', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getMovieRatings(movieId: number) {
+  async getMovieRatings(movieId: number): Promise<{ ratings: Array<{ id: number; userId: number; userName: string; movieId: number; rating: number; comment?: string; createdAt: string }>; averageRating: number; totalRatings: number }> {
     return this.request(`/api/ratings/movie/${movieId}`);
   }
 
-  async getUserMovieRating(userId: number, movieId: number) {
+  async getUserMovieRating(userId: number, movieId: number): Promise<{ id: number; userId: number; movieId: number; rating: number; comment?: string }> {
     return this.request(`/api/ratings/user/${userId}/movie/${movieId}`);
   }
 
-  async deleteRating(ratingId: number) {
+  async deleteRating(ratingId: number): Promise<{ message: string }> {
     return this.request(`/api/ratings/${ratingId}`, {
       method: 'DELETE',
     });
