@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 import Navigation from '@/components/Navigation';
@@ -19,6 +19,35 @@ export default function ProfilePage() {
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveSuccess, setSaveSuccess] = useState('');
+    const [ratingsCount, setRatingsCount] = useState(0);
+    const [reviewsCount, setReviewsCount] = useState(0);
+    const [averageRating, setAverageRating] = useState(0);
+
+    useEffect(() => {
+        const fetchUserStats = async () => {
+            if (user?.id) {
+                try {
+                    const ratings = await apiClient.getUserRatings(user.id);
+                    setRatingsCount(ratings.length);
+                    const reviewsWithComments = ratings.filter(
+                        r => r.comment && r.comment.trim() !== ''
+                    );
+                    setReviewsCount(reviewsWithComments.length);
+
+                if (ratings.length > 0) {
+                    const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
+                    const avg = totalRating / ratings.length;
+                    setAverageRating(Math.round(avg * 10) / 10);
+                } else {
+                    setAverageRating(0);
+                }
+                } catch (error) {
+                    console.error('Error fetching user stats:', error);
+                }
+            }
+        };
+        fetchUserStats();
+    }, [user?.id]);
 
     const getUserInitials = (username: string) => {
         return username.slice(0, 2).toUpperCase();
@@ -151,11 +180,11 @@ export default function ProfilePage() {
                             {/* Stats */}
                             <div className="flex space-x-6">
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-purple-400">0</div>
-                                    <div className="text-sm text-gray-400">Movies Rated</div>
+                                    <div className="text-2xl font-bold text-purple-400">{averageRating.toFixed(1)}⭐</div>
+                                    <div className="text-sm text-gray-400">Average Movie Ratings</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-purple-400">0</div>
+                                    <div className="text-2xl font-bold text-purple-400">{reviewsCount}</div>
                                     <div className="text-sm text-gray-400">Reviews</div>
                                 </div>
                                 <div className="text-center">

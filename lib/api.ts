@@ -151,6 +151,10 @@ export class ApiClient {
     });
   }
 
+  async getUserRatings(userId: number): Promise<any[]> {
+    return this.request(`/api/ratings/user/${userId}`);
+  }
+
   async getMovieRatings(movieId: number): Promise<{ ratings: Array<{ id: number; userId: number; userName: string; movieId: number; rating: number; comment?: string; createdAt: string }>; averageRating: number; totalRatings: number }> {
     return this.request(`/api/ratings/movie/${movieId}`);
   }
