@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { apiClient } from '@/lib/api';
 import Navigation from '@/components/Navigation';
@@ -8,7 +9,7 @@ import Navigation from '@/components/Navigation';
 export default function ProfilePage() {
     const { user, isAuthenticated, logout, updateUser } = useAuth();
     
-    function parseDate(dateArray: any) {
+    function parseDate(dateArray: number[] | string | null): string {
     if (!dateArray) return 'No Date';
 
     if (typeof dateArray === 'string') {
@@ -34,24 +35,26 @@ export default function ProfilePage() {
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveSuccess, setSaveSuccess] = useState('');
-    const [ratingsCount, setRatingsCount] = useState(0);
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentReviews, setRecentReviews] =  useState<any[]>([]);
 
     useEffect(() => {
         const fetchUserStats = async () => {
             if (user?.id) {
                 try {
-                    const ratings = await apiClient.getUserRatings(user.id);
-                    setRatingsCount(ratings.length);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const ratings: any[] = await apiClient.getUserRatings(user.id) as any[];
                     const reviewsWithComments = ratings.filter(
                         r => r.comment && r.comment.trim() !== ''
                     );
                     const recent = reviewsWithComments
                         .sort((a, b) => {
-                            const getTime = (arr: any) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const getTime = (arr: any): number => {
                                 if (!arr || !Array.isArray(arr)) return 0;
                                 const [y, m, d, h = 0, min = 0, s= 0] = arr;
                                 return new Date(y, m -1, d, h, min, s).getTime();
@@ -274,9 +277,11 @@ export default function ProfilePage() {
                                 <div key={review.id} className="flex items-start space-x-3 bg-gray-700 rounded-lg p-3">
                                     <div className="flex-shrink-0 w-12 h-16 bg-gray-600 rounded overflow-hidden">
                                     {review.movie.posterUrl ? (
-                                        <img 
+                                        <Image 
                                         src={review.movie.posterUrl} 
                                         alt={review.movie.name}
+                                        width={48}
+                                        height={64}
                                         className="w-full h-full object-cover"
                                         />
                                     ) : (
@@ -325,9 +330,11 @@ export default function ProfilePage() {
                                     <div key={rating.id} className="flex items-center space-x-3 bg-gray-700 rounded-lg p-3">
                                         <div className="flex-shrink-0 w-12 h-16 bg-gray-600 rounded overflow-hidden">
                                             {rating.movie.posterUrl && (
-                                                <img
+                                                <Image
                                                     src={rating.movie.posterUrl}
                                                     alt={rating.movie.name}
+                                                    width={48}
+                                                    height={64}
                                                     className="w-full h-full object-cover"
                                                 />
                                             )}

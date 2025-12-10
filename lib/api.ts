@@ -33,6 +33,24 @@ export interface Movie {
   posterUrl?: string;
 }
 
+export interface UserRating {
+  id: number;
+  user: { id: number; username: string; password: string };
+  movie: {
+    id: number;
+    name: string;
+    releaseYear: number;
+    description: string;
+    durationMinutes: number;
+    genres: string[];
+    posterUrl: string;
+  };
+  rating: number;
+  comment?: string;
+  createdAt: number[];
+  updatedAt: string;
+}
+
 export class ApiClient {
   private baseUrl: string;
 
@@ -151,7 +169,7 @@ export class ApiClient {
     });
   }
 
-  async getUserRatings(userId: number): Promise<any[]> {
+  async getUserRatings(userId: number): Promise<unknown[]> {
     return this.request(`/api/ratings/user/${userId}`);
   }
 
