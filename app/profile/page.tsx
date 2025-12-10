@@ -41,6 +41,7 @@ export default function ProfilePage() {
     const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentReviews, setRecentReviews] =  useState<any[]>([]);
+    const [followingCount, setFollowingCount] = useState(0);
 
     useEffect(() => {
         const fetchUserStats = async () => {
@@ -62,6 +63,8 @@ export default function ProfilePage() {
                             return getTime(b.createdAt) - getTime(a.createdAt);
                         })
                         .slice(0, 3);
+                    const followingData = await apiClient.getFollowing(user.id);
+                    setFollowingCount(followingData.following.length);
                     setRecentReviews(recent);
                     setReviewsCount(reviewsWithComments.length);
 
@@ -225,8 +228,8 @@ export default function ProfilePage() {
                                     <div className="text-sm text-gray-400">Reviews</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-purple-400">0</div>
-                                    <div className="text-sm text-gray-400">Friends</div>
+                                    <div className="text-2xl font-bold text-purple-400">{followingCount}</div>
+                                    <div className="text-sm text-gray-400">Following</div>
                                 </div>
                             </div>
                         </div>

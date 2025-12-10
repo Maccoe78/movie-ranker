@@ -187,6 +187,27 @@ export class ApiClient {
     });
   }
 
+  // Following methods
+  async followUser(userId: number, followedUserId: number): Promise<{message: string}> {
+    return this.request(`/api/follows/${userId}/follow/${followedUserId}`, {
+      method: 'POST',
+    });
+  }
+
+  async unfollowUser(userId: number, followedUserId: number): Promise<{message: string}> {
+    return this.request(`/api/follows/${userId}/follow/${followedUserId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getFollowing(userId: number): Promise<{ following: Array<{ id: number; username: string;}> }> {
+    return this.request(`/api/follows/${userId}/following`);
+  }
+
+  async searchUsers(username: string): Promise<Array<{id: number; username: string;}>> {
+    return this.request(`/api/follows/search?username=${encodeURIComponent(username)}`);
+  }
+
 }
 
 export const apiClient = new ApiClient();
