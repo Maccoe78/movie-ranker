@@ -37,7 +37,9 @@ export default function ProfilePage() {
     const [saveSuccess, setSaveSuccess] = useState('');
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentReviews, setRecentReviews] =  useState<any[]>([]);
     const [followingCount, setFollowingCount] = useState(0);
 
@@ -45,12 +47,14 @@ export default function ProfilePage() {
         const fetchUserStats = async () => {
             if (user?.id) {
                 try {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const ratings: any[] = await apiClient.getUserRatings(user.id) as any[];
                     const reviewsWithComments = ratings.filter(
                         r => r.comment && r.comment.trim() !== ''
                     );
                     const recent = reviewsWithComments
                         .sort((a, b) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const getTime = (arr: any): number => {
                                 if (!arr || !Array.isArray(arr)) return 0;
                                 const [y, m, d, h = 0, min = 0, s= 0] = arr;

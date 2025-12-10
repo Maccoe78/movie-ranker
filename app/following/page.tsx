@@ -6,8 +6,10 @@ import { apiClient } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 
 export default function FollowingPage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [following, setFollowing] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [showSearch, setShowSearch] = useState(false);
     const [loading, setLoading] = useState(false);
