@@ -8,6 +8,21 @@ import Navigation from '@/components/Navigation';
 export default function ProfilePage() {
     const { user, isAuthenticated, logout, updateUser } = useAuth();
     
+    function parseDate(dateArray: any) {
+    if (!dateArray) return 'No Date';
+
+    if (typeof dateArray === 'string') {
+        return new Date(dateArray).toLocaleDateString('nl-NL', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    
+    return 'Invalid Date';
+    }
+
     // Form state for editing account info
     const [accountForm, setAccountForm] = useState({
         username: user?.username || '',
@@ -22,6 +37,8 @@ export default function ProfilePage() {
     const [ratingsCount, setRatingsCount] = useState(0);
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
+    const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
+    const [recentReviews, setRecentReviews] =  useState<any[]>([]);
 
     useEffect(() => {
         const fetchUserStats = async () => {
@@ -32,6 +49,17 @@ export default function ProfilePage() {
                     const reviewsWithComments = ratings.filter(
                         r => r.comment && r.comment.trim() !== ''
                     );
+                    const recent = reviewsWithComments
+                        .sort((a, b) => {
+                            const getTime = (arr: any) => {
+                                if (!arr || !Array.isArray(arr)) return 0;
+                                const [y, m, d, h = 0, min = 0, s= 0] = arr;
+                                return new Date(y, m -1, d, h, min, s).getTime();
+                            };
+                            return getTime(b.createdAt) - getTime(a.createdAt);
+                        })
+                        .slice(0, 3);
+                    setRecentReviews(recent);
                     setReviewsCount(reviewsWithComments.length);
 
                 if (ratings.length > 0) {
@@ -41,6 +69,12 @@ export default function ProfilePage() {
                 } else {
                     setAverageRating(0);
                 }
+
+                const highestRated = ratings
+                    .sort((a, b) => b.rating - a.rating)
+                    .slice(0, 3);
+                setFavoriteMovies(highestRated);
+
                 } catch (error) {
                     console.error('Error fetching user stats:', error);
                 }
@@ -218,20 +252,54 @@ export default function ProfilePage() {
                     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
                         <h2 className="text-xl font-bold text-white mb-4 flex items-center">
                             <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            Recent Activity
+                            Recent Comments
                         </h2>
-                        <div className="text-center py-8">
+                        
+                        {recentReviews.length === 0 ? (
+                            <div className="text-center py-8">
                             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
                                 <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4l-2 16h14l-2-16" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4l-2 16h14l-2-16" />
                                 </svg>
                             </div>
                             <p className="text-gray-400">No recent activity</p>
                             <p className="text-sm text-gray-500 mt-1">Start rating movies to see your activity here</p>
+                            </div>
+                        ) : (
+                            <>
+                            <div className="space-y-3">
+                                {recentReviews.map((review) => (
+                                <div key={review.id} className="flex items-start space-x-3 bg-gray-700 rounded-lg p-3">
+                                    <div className="flex-shrink-0 w-12 h-16 bg-gray-600 rounded overflow-hidden">
+                                    {review.movie.posterUrl ? (
+                                        <img 
+                                        src={review.movie.posterUrl} 
+                                        alt={review.movie.name}
+                                        className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                                        </svg>
+                                        </div>
+                                    )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium text-sm truncate">{review.movie.name}</p>
+                                    <p className="text-gray-300 text-xs mt-1 line-clamp-2">{review.comment}</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {parseDate(review.createdAt)}
+                                    </p>
+                                    </div>
+                                </div>
+                                ))}
+                            </div>
+                            </>
+                        )}
                         </div>
-                    </div>
 
                     {/* Favorite Movies */}
                     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
@@ -241,15 +309,40 @@ export default function ProfilePage() {
                             </svg>
                             Favorite Movies
                         </h2>
-                        <div className="text-center py-8">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
-                                <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                                </svg>
+                        {favoriteMovies.length === 0 ? (
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full gb-gray-700 flex items-center justify-center">
+                                    <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                                    </svg>
+                                </div>
+                                <p className="text-gray-400">No favorite movies yet</p>
+                                <p className="text-sm text-gray-500 mt-1">Rate movies to add them to favorites</p>
                             </div>
-                            <p className="text-gray-400">No favorite movies yet</p>
-                            <p className="text-sm text-gray-500 mt-1">Rate movies 5 stars to add them to favorites</p>
-                        </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {favoriteMovies.map((rating) => (
+                                    <div key={rating.id} className="flex items-center space-x-3 bg-gray-700 rounded-lg p-3">
+                                        <div className="flex-shrink-0 w-12 h-16 bg-gray-600 rounded overflow-hidden">
+                                            {rating.movie.posterUrl && (
+                                                <img
+                                                    src={rating.movie.posterUrl}
+                                                    alt={rating.movie.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-white font-medium truncate">{rating.movie.name}</p>
+                                            <p className="text-sm text-gray-400">{rating.movie.releaseYear}</p>
+                                        </div>
+                                        <div className="text-yellow-400">
+                                            {'⭐'.repeat(rating.rating)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
