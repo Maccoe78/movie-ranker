@@ -37,23 +37,20 @@ export default function ProfilePage() {
     const [saveSuccess, setSaveSuccess] = useState('');
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentReviews, setRecentReviews] =  useState<any[]>([]);
+    const [followingCount, setFollowingCount] = useState(0);
 
     useEffect(() => {
         const fetchUserStats = async () => {
             if (user?.id) {
                 try {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const ratings: any[] = await apiClient.getUserRatings(user.id) as any[];
                     const reviewsWithComments = ratings.filter(
                         r => r.comment && r.comment.trim() !== ''
                     );
                     const recent = reviewsWithComments
                         .sort((a, b) => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const getTime = (arr: any): number => {
                                 if (!arr || !Array.isArray(arr)) return 0;
                                 const [y, m, d, h = 0, min = 0, s= 0] = arr;
@@ -62,6 +59,8 @@ export default function ProfilePage() {
                             return getTime(b.createdAt) - getTime(a.createdAt);
                         })
                         .slice(0, 3);
+                    const followingData = await apiClient.getFollowing(user.id);
+                    setFollowingCount(followingData.following.length);
                     setRecentReviews(recent);
                     setReviewsCount(reviewsWithComments.length);
 
@@ -225,8 +224,8 @@ export default function ProfilePage() {
                                     <div className="text-sm text-gray-400">Reviews</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-purple-400">0</div>
-                                    <div className="text-sm text-gray-400">Friends</div>
+                                    <div className="text-2xl font-bold text-purple-400">{followingCount}</div>
+                                    <div className="text-sm text-gray-400">Following</div>
                                 </div>
                             </div>
                         </div>
