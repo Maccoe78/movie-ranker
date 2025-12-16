@@ -435,30 +435,24 @@ export default function ProfilePage() {
                         )}
 
                         {/* Buttons */}
-                        <div className="flex space-x-4">
-                            {isEditing ? (
-                                <>
-                                    <button
-                                        type="submit"
-                                        disabled={saveLoading}
-                                        className="px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white rounded-lg transition-colors"
-                                    >
-                                        {saveLoading ? 'Saving Changes...' : 'Save Changes'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={resetForm}
-                                        className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                </>
-                            ) : (
-                                <button className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                    Privacy Settings
+                        {isEditing && (
+                            <div className="flex space-x-4">
+                                <button
+                                    type="submit"
+                                    disabled={saveLoading}
+                                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white rounded-lg transition-colors"
+                                >
+                                    {saveLoading ? 'Saving Changes...' : 'Save Changes'}
                                 </button>
-                            )}
-                        </div>
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>
