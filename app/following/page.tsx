@@ -95,6 +95,7 @@ export default function FollowingPage() {
                             <input
                                 type="text"
                                 value={searchQuery}
+                                data-testid="search-users"
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                 placeholder="Search users by username..."
