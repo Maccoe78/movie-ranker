@@ -15,6 +15,11 @@ const customJestConfig = {
         '**/__tests__/**/*.[jt]s?(x)',
         '**/?(*.)+(spec|test).[jt]s?(x)'
     ],
+    globals: {
+        'ts-jest': {
+            tsconfig: '<rootDir>/tsconfig.test.json'
+        }
+    }
 }
 
 module.exports = createJestConfig(customJestConfig);

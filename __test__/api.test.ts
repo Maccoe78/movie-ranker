@@ -1,6 +1,7 @@
+/// <reference types="jest" />
 import { apiClient } from '../lib/api';
 
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.Mock;
 
 describe('ApiClient - Following', () => {
     beforeEach(() => {
@@ -8,21 +9,23 @@ describe('ApiClient - Following', () => {
     });
 
     it('should follow a user successfully', async () => {
-        (fetch as jest.Mock).mockResolvedValueOnce({
+        const mockResponse = {
             ok: true,
-            json: async () => ({ 
+            text: async () => JSON.stringify({ 
                 message: 'Followed successfully',
                 user: { id: 1, username: 'test' }
             }),
-        });
+        };
+        
+        (fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-            const response = await apiClient.followUser(1, 2);
+        const response = await apiClient.followUser(1, 2);
 
-            expect(fetch).toHaveBeenCalledWith(
-                'http://localhost:8080/api/follows/1/follow/2',
-                expect.objectContaining({ method: 'POST' })
-            );
-            expect(response.message).toBe('Followed successfully');
+        expect(fetch).toHaveBeenCalledWith(
+            'http://localhost:8080/api/follows/1/follow/2',
+            expect.objectContaining({ method: 'POST' })
+        );
+        expect(response.message).toBe('Followed successfully');
     });
 
     
