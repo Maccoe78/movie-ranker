@@ -168,6 +168,8 @@ const handleSubmitRating = async () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
+                        data-testid={`rating-star-${star}`}
+                        data-rating={star}
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
@@ -179,6 +181,8 @@ const handleSubmitRating = async () => {
                   </div>
 
                   <textarea
+                    name="review"
+                    data-testid="review-comment"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Write your review (optional)..."
