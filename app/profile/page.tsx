@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 
 export default function ProfilePage() {
-    const { user, isAuthenticated, logout, updateUser } = useAuth();
+    const { user, isAuthenticated, logout, updateUser, deleteUser } = useAuth();
     
     function parseDate(dateArray: number[] | string | null): string {
     if (!dateArray) return 'No Date';
@@ -99,7 +99,6 @@ export default function ProfilePage() {
         setSaveError('');
         setSaveSuccess('');
 
-        // Validation
         if (accountForm.newPassword && accountForm.newPassword !== accountForm.confirmPassword) {
             setSaveError('New passwords do not match');
             setSaveLoading(false);
@@ -196,6 +195,18 @@ export default function ProfilePage() {
         window.location.href = '/'; 
     }
 
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Weet je zeker dat je je account wilt verwijderen?')) return;
+
+        try {
+            await deleteUser(user.id);
+            
+        } catch (error) {
+            alert('Account verwijderen mislukt!');
+            console.error('Account deletion failed:', error);
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gray-900">
             {/* Navigation */}
@@ -247,6 +258,12 @@ export default function ProfilePage() {
                                 className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                             >
                                 Sign Out
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+                            >
+                                Delete Account
                             </button>
                         </div>
                     </div>

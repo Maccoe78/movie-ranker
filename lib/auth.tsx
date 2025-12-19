@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { apiClient } from './api';
 
 interface User {
   id: number;
@@ -14,6 +15,7 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   updateUser: (userData: User) => void;
+  deleteUser: (userId: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +71,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   setUser(userData);
   localStorage.setItem('user', JSON.stringify(userData));
   };
+  
+  const deleteUser = async (userId: number) => {
+    await apiClient.deleteUser(userId);
+    logout();
+    window.location.href = '/';
+  };
 
   const value = {
     user,
@@ -77,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     loading,
     updateUser,
+    deleteUser,
   };
 
   return (

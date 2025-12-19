@@ -74,10 +74,23 @@ export class ApiClient {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`API Error: ${response.status} - ${error}`);
+      throw new Error(error || `API Error: ${response.status}`);
     }
 
-    return response.json();
+    const text = await response.text();
+    
+    // If response is empty, return empty object
+    if (!text) {
+      return {} as T;
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      // If not JSON and response was successful, return as message object
+      return { message: text } as T;
+    }
   }
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
@@ -132,6 +145,12 @@ export class ApiClient {
     return this.request<{ message: string; username: string }>(`/api/auth/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data), 
+    });
+  }
+
+  async deleteUser(userId: number): Promise<{ message: string }> {
+    return this.request(`/api/auth/users/${userId}`, {
+      method: 'DELETE',
     });
   }
 
