@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { getUserProfileStats, parseDate } from '@/services/ratingService';
 import { updateUserProfile, getUserInitials } from '@/services/userService';
+import { RatingWithMovie } from '@/types/rating';
 import Navigation from '@/components/Navigation';
 
 export default function ProfilePage() {
@@ -22,8 +23,8 @@ export default function ProfilePage() {
     const [saveSuccess, setSaveSuccess] = useState('');
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
-    const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
-    const [recentReviews, setRecentReviews] =  useState<any[]>([]);
+    const [favoriteMovies, setFavoriteMovies] = useState<RatingWithMovie[]>([]);
+    const [recentReviews, setRecentReviews] =  useState<RatingWithMovie[]>([]);
     const [followingCount, setFollowingCount] = useState(0);
 
     useEffect(() => {

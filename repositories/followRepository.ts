@@ -1,4 +1,4 @@
-import { Follow, FollowedUser, FollowingResponse } from '@/types/follow';
+import { FollowedUser, FollowingResponse } from '@/types/follow';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 

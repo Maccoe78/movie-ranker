@@ -1,4 +1,4 @@
-import { User, UserProfile, UpdateUserRequest, LoginRegisterRequest, AuthResponse, LoginResponse, UserDetails, UpdateUserResponse  } from '@/types/user';
+import { UpdateUserRequest, LoginRegisterRequest, AuthResponse, LoginResponse, UserDetails, UpdateUserResponse  } from '@/types/user';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 

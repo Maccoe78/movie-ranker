@@ -1,4 +1,4 @@
-import { FollowedUser, FollowingResponse } from '@/types/follow';
+import { FollowedUser } from '@/types/follow';
 import { 
   followUser, 
   unfollowUser, 

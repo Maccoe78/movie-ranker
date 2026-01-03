@@ -1,5 +1,4 @@
 import { 
-  User, 
   LoginRegisterRequest, 
   UpdateUserRequest, 
   AuthResponse,

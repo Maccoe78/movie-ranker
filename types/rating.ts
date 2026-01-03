@@ -12,6 +12,15 @@ export interface RatingWithUser extends Rating {
   userName: string;
 }
 
+export interface RatingWithMovie extends Rating {
+  movie: {
+    id: number;
+    name: string;
+    posterUrl?: string;
+    releaseYear?: number;
+  };
+}
+
 export interface MovieRatingsResponse {
   ratings: RatingWithUser[];
   averageRating: number;
@@ -26,9 +35,9 @@ export interface RatingRequest {
 }
 
 export interface UserProfileStats {
-  recentReviews: Rating[];
+  recentReviews: RatingWithMovie[];
   reviewsCount: number;
   averageRating: number;
-  favoriteMovies: Rating[];
+  favoriteMovies: RatingWithMovie[];
   followingCount: number;
 }

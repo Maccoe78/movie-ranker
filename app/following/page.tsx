@@ -50,7 +50,7 @@ export default function FollowingPage() {
             const result = await followAndRefresh(user.id, userId, searchResults);
             setFollowing(result.following);
             setSearchResults(result.searchResults);
-        } catch (error) {
+        } catch {
             alert('Failed to follow user');
         }
     };
@@ -61,7 +61,7 @@ export default function FollowingPage() {
         try {
             const updatedList = await unfollowAndRefresh(user.id, userId);
             setFollowing(updatedList);
-        } catch (error) {
+        } catch {
             alert('Failed to unfollow user');
         }
     };
