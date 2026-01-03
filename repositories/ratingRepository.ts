@@ -1,4 +1,4 @@
-import { MovieRatingsResponse, Rating, RatingRequest } from '@/types/rating';
+import { MovieRatingsResponse, Rating, RatingRequest, RatingWithMovie } from '@/types/rating';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -38,7 +38,7 @@ export async function addOrUpdateRating(data: RatingRequest): Promise<Rating> {
     });
   }
 
-  export async function getUserRatings(userId: number): Promise<Rating[]> {
+  export async function getUserRatings(userId: number): Promise<RatingWithMovie[]> {
     return request(`/api/ratings/user/${userId}`);
   }
 

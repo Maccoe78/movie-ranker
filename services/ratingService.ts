@@ -1,4 +1,4 @@
-import { Rating, RatingRequest, MovieRatingsResponse, UserProfileStats } from '@/types/rating';
+import { Rating, RatingRequest, MovieRatingsResponse, UserProfileStats, RatingWithMovie } from '@/types/rating';
 import { getFollowing } from '@/repositories/followRepository';
 import { addOrUpdateRating as addOrUpdateRatingRepo, 
   getUserRatings, 
@@ -38,7 +38,7 @@ export async function getMovieRatingsWithStats(movieId: number): Promise<MovieRa
   }
 }
 
-export async function getUserRatingHistory(userId: number): Promise<Rating[]> {
+export async function getUserRatingHistory(userId: number): Promise<RatingWithMovie[]> {
   try {
     console.log('RatingService: Fetching ratings for user:', userId);
     const ratings = await getUserRatings(userId);
@@ -70,20 +70,20 @@ export function validateRatingValue(rating: number): boolean {
   return rating >= 1 && rating <= 5 && Number.isInteger(rating);
 }
 
-export function calculateUserAverageRating(ratings: Rating[]): number {
+export function calculateUserAverageRating(ratings: RatingWithMovie[]): number {
   if (ratings.length === 0) return 0;
   
   const total = ratings.reduce((sum, rating) => sum + rating.rating, 0);
   return Math.round((total / ratings.length) * 10) / 10; // Round to 1 decimal
 }
 
-export function getHighestRatedMovies(ratings: Rating[], limit: number = 3): Rating[] {
+export function getHighestRatedMovies(ratings: RatingWithMovie[], limit: number = 3): RatingWithMovie[] {
   return [...ratings]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, limit);
 }
 
-export function getRecentReviews(ratings: Rating[], limit: number = 5): Rating[] {
+export function getRecentReviews(ratings: RatingWithMovie[], limit: number = 5): RatingWithMovie[] {
   return ratings
     .filter(rating => rating.comment && rating.comment.trim().length > 0)
     .sort((a, b) => {
@@ -134,16 +134,16 @@ export async function getUserProfileStats(userId: number): Promise<UserProfileSt
       getFollowing(userId)
     ]);
 
-    const recentReviews = getRecentReviews(ratings, 3);
-    const favoriteMovies = getHighestRatedMovies(ratings, 3);
-    const averageRating = calculateUserAverageRating(ratings);
+    const recentReviews: RatingWithMovie[] = getRecentReviews(ratings, 3);
+    const favoriteMovies: RatingWithMovie[] = getHighestRatedMovies(ratings, 3);
+    const averageRating: number = calculateUserAverageRating(ratings);
 
     return {
       recentReviews,
       reviewsCount: recentReviews.length,
       averageRating,
       favoriteMovies,
-      followingCount: followingData.following.length // Pas aan afhankelijk van response
+      followingCount: followingData.following.length
     };
   } catch (error) {
     console.error('RatingService: Error fetching profile stats:', error);
