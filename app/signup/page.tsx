@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+import { registerUser } from '@/services/userService';
 
 export default function SignupPage() {
   const [username, setUsername] = useState('');
@@ -18,7 +18,7 @@ export default function SignupPage() {
     setError('');
 
     try {
-      const response = await apiClient.register({ username, password });
+      const response = await registerUser(username, password);
       console.log('Registration successful:', response);
       setSuccess(true);
     } catch (err) {

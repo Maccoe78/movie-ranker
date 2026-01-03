@@ -122,3 +122,19 @@ export function filterUsersByUsername(users: FollowedUser[], query: string): Fol
     user.username.toLowerCase().includes(lowerQuery)
   );
 }
+
+export async function followAndRefresh(userId: number, targetUserId: number, currentSearchResults: FollowedUser[]): Promise<{ following: FollowedUser[], searchResults: FollowedUser[] }> {
+  await followUserById(userId, targetUserId);
+  const updatedFollowing = await getFollowingList(userId);
+  const updatedSearchResults = currentSearchResults.filter(u => u.id !== targetUserId);
+  
+  return {
+    following: updatedFollowing,
+    searchResults: updatedSearchResults
+  };
+}
+
+export async function unfollowAndRefresh(userId: number, targetUserId: number): Promise<FollowedUser[]> {
+  await unfollowUserById(userId, targetUserId);
+  return await getFollowingList(userId);
+}

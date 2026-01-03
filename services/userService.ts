@@ -73,46 +73,62 @@ export async function loginUser(username: string, password: string): Promise<Aut
 
 export async function updateUserProfile(
   userId: number, 
-  updates: { username?: string; password?: string }
+  updates: UpdateUserRequest
 ): Promise<UpdateUserResponse> {
-  // BUSINESS LOGICA: Validatie
   if (!userId) {
     throw new Error('User ID is required');
   }
 
-  // Check if there are any changes
-  if (!updates.username && !updates.password) {
+  // VALIDATIE: Check passwords match
+  if (updates.password && updates.password !== updates.confirmPassword) {
+    throw new Error('New passwords do not match');
+  }
+
+  // VALIDATIE: Password length
+  if (updates.password && updates.password.length < 6) {
+    throw new Error('Password must be at least 6 characters long');
+  }
+
+  // BUSINESS LOGIC: Build update data (only include what changed)
+  const updateData: { username?: string; password?: string } = {};
+  
+  if (updates.username && updates.username !== updates.currentUsername) {
+    updateData.username = updates.username;
+  }
+  
+  if (updates.password && updates.password.trim().length > 0) {
+    updateData.password = updates.password;
+  }
+
+  // VALIDATIE: Check if there are any changes
+  if (Object.keys(updateData).length === 0) {
     throw new Error('No changes to save');
   }
 
   // Validate username if provided
-  if (updates.username) {
-    if (updates.username.trim().length === 0) {
+  if (updateData.username) {
+    if (updateData.username.trim().length === 0) {
       throw new Error('Username cannot be empty');
     }
-    if (updates.username.length < 3) {
+    if (updateData.username.length < 3) {
       throw new Error('Username must be at least 3 characters long');
     }
-    if (updates.username.length > 50) {
+    if (updateData.username.length > 50) {
       throw new Error('Username cannot exceed 50 characters');
     }
   }
-  if (updates.password) {
-    if (updates.password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
-    }
-    if (updates.password.length > 100) {
-      throw new Error('Password cannot exceed 100 characters');
-    }
+
+  if (updateData.password && updateData.password.length > 100) {
+    throw new Error('Password cannot exceed 100 characters');
   }
 
   try {
     console.log('UserService: Updating user:', userId);
-    const updateData: UpdateUserRequest = {};
-    if (updates.username) updateData.username = updates.username;
-    if (updates.password) updateData.password = updates.password;
+    const repoData: { username?: string; password?: string } = {};
+    if (updateData.username) repoData.username = updateData.username;
+    if (updateData.password) repoData.password = updateData.password;
 
-    const response = await updateUserRepo(userId, updateData);
+    const response = await updateUserRepo(userId, repoData);
     console.log('UserService: User updated successfully');
     return response;
   } catch (error) {

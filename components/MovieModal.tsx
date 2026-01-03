@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Movie } from '@/types/movie';
-import { apiClient } from '@/lib/api';
+import { getMovieRatingsWithStats, addOrUpdateRating, parseDate } from '@/services/ratingService';
+import { getUserInitials } from '@/services/userService';
 import { useAuth } from '@/lib/auth';
 
 interface MovieModalProps {
@@ -34,7 +35,7 @@ useEffect(() => {
     const fetchRatings = async () => {
       setLoadingRatings(true);
       try {
-        const ratingData = await apiClient.getMovieRatings(movie.id);
+        const ratingData = await getMovieRatingsWithStats(movie.id);
         setRatings(ratingData.ratings || []);
       } catch (error) {
         console.error('Error fetching ratings:', error);
@@ -49,18 +50,13 @@ useEffect(() => {
   if (!isOpen || !movie) return null;
 
 const handleSubmitRating = async () => {
-  if (rating === 0) {
-    alert('Please select a rating');
-    return;
-  }
-
   if (!user) {
     alert('Please log in to rate movies');
     return;
   }
 
   try {
-    await apiClient.addOrUpdateRating({
+    await addOrUpdateRating({
       userId: user.id,
       movieId: movie.id,
       rating,
@@ -71,11 +67,11 @@ const handleSubmitRating = async () => {
     setShowRatingForm(false);
     setRating(0);
     setComment('');
-    const updatedRatings = await apiClient.getMovieRatings(movie.id);
+    const updatedRatings = await getMovieRatingsWithStats(movie.id);
     setRatings(updatedRatings.ratings || []);
   } catch (error) {
     console.error('Error submitting rating:', error);
-    alert('Failed to submit rating');
+    alert(error instanceof Error ? error.message : 'Failed to submit rating');
   }
 };
 
@@ -222,17 +218,14 @@ const handleSubmitRating = async () => {
                     <div key={rating.id} className="bg-gray-700 rounded-lg p-4">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold">
-                          {rating.userName.charAt(0).toUpperCase()}
+                          {getUserInitials(rating.userName)}
                         </div>
                         
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <h4 className="text-white font-medium">{rating.userName}</h4>
                             <span className="text-sm text-gray-400">
-                              {rating.createdAt
-                                ? new Date(rating.createdAt).toLocaleDateString()
-                                : 'No Date'
-                              }
+                              {parseDate(rating.createdAt)}
                             </span>
                           </div>
 

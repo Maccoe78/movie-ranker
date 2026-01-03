@@ -3,28 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
-import { apiClient } from '@/lib/api';
+import { getUserProfileStats, parseDate } from '@/services/ratingService';
+import { updateUserProfile, getUserInitials } from '@/services/userService';
 import Navigation from '@/components/Navigation';
 
 export default function ProfilePage() {
     const { user, isAuthenticated, logout, updateUser, deleteUser } = useAuth();
-    
-    function parseDate(dateArray: number[] | string | null): string {
-    if (!dateArray) return 'No Date';
 
-    if (typeof dateArray === 'string') {
-        return new Date(dateArray).toLocaleDateString('nl-NL', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    }
-
-    
-    return 'Invalid Date';
-    }
-
-    // Form state for editing account info
     const [accountForm, setAccountForm] = useState({
         username: user?.username || '',
         currentPassword: '',
@@ -37,132 +22,63 @@ export default function ProfilePage() {
     const [saveSuccess, setSaveSuccess] = useState('');
     const [reviewsCount, setReviewsCount] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [recentReviews, setRecentReviews] =  useState<any[]>([]);
     const [followingCount, setFollowingCount] = useState(0);
 
     useEffect(() => {
         const fetchUserStats = async () => {
             if (user?.id) {
-                try {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const ratings: any[] = await apiClient.getUserRatings(user.id) as any[];
-                    const reviewsWithComments = ratings.filter(
-                        r => r.comment && r.comment.trim() !== ''
-                    );
-                    const recent = reviewsWithComments
-                        .sort((a, b) => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const getTime = (arr: any): number => {
-                                if (!arr || !Array.isArray(arr)) return 0;
-                                const [y, m, d, h = 0, min = 0, s= 0] = arr;
-                                return new Date(y, m -1, d, h, min, s).getTime();
-                            };
-                            return getTime(b.createdAt) - getTime(a.createdAt);
-                        })
-                        .slice(0, 3);
-                    const followingData = await apiClient.getFollowing(user.id);
-                    setFollowingCount(followingData.following.length);
-                    setRecentReviews(recent);
-                    setReviewsCount(reviewsWithComments.length);
-
-                if (ratings.length > 0) {
-                    const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
-                    const avg = totalRating / ratings.length;
-                    setAverageRating(Math.round(avg * 10) / 10);
-                } else {
-                    setAverageRating(0);
-                }
-
-                const highestRated = ratings
-                    .sort((a, b) => b.rating - a.rating)
-                    .slice(0, 3);
-                setFavoriteMovies(highestRated);
-
-                } catch (error) {
-                    console.error('Error fetching user stats:', error);
-                }
+            try {
+                const stats = await getUserProfileStats(user.id);
+                
+                // Simpel state updates
+                setRecentReviews(stats.recentReviews);
+                setReviewsCount(stats.reviewsCount);
+                setAverageRating(stats.averageRating);
+                setFavoriteMovies(stats.favoriteMovies);
+                setFollowingCount(stats.followingCount);
+            } catch (error) {
+                console.error('Error fetching user stats:', error);
+            }
             }
         };
         fetchUserStats();
-    }, [user?.id]);
+        }, [user?.id]);
 
-    const getUserInitials = (username: string) => {
-        return username.slice(0, 2).toUpperCase();
-    }
 
     const handleSaveChanges = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSaveLoading(true);
-        setSaveError('');
-        setSaveSuccess('');
+    e.preventDefault();
+    setSaveLoading(true);
+    setSaveError('');
+    setSaveSuccess('');
 
-        if (accountForm.newPassword && accountForm.newPassword !== accountForm.confirmPassword) {
-            setSaveError('New passwords do not match');
-            setSaveLoading(false);
-            return;
+    try {
+        const response = await updateUserProfile(user!.id, {
+            currentUsername: user!.username,
+            username: accountForm.username,
+            password: accountForm.newPassword,
+            confirmPassword: accountForm.confirmPassword
+        });
+
+        if (accountForm.username !== user!.username) {
+            updateUser({ ...user!, username: accountForm.username });
         }
 
-        if (accountForm.newPassword && accountForm.newPassword.length < 6) {
-            setSaveError('Password must be at least 6 characters long');
-            setSaveLoading(false);
-            return;
-        }
-
-        try {
-            // Build update data object
-            const updateData: { username?: string; password?: string } = {};
-            
-            // Only include username if it changed
-            if (accountForm.username !== user?.username) {
-                updateData.username = accountForm.username;
-            }
-            
-            // Only include password if a new one was provided
-            if (accountForm.newPassword) {
-                updateData.password = accountForm.newPassword;
-            }
-
-            // Check if there are any changes to save
-            if (Object.keys(updateData).length === 0) {
-                setSaveError('No changes to save');
-                setSaveLoading(false);
-                return;
-            }
-
-            console.log('Updating user with:', updateData);
-            console.log('Current user object:', user);
-            console.log('User ID:', user!.id);
-
-            // Call the API
-            const response = await apiClient.updateUser(user!.id, updateData);
-
-            console.log('Update response:', response);
-
-            // Update the user in the AuthContext if username changed
-            if (updateData.username) {
-                const updatedUser = { ...user!, username: updateData.username };
-                updateUser(updatedUser);
-            }
-
-            setSaveSuccess(response.message || 'Account updated successfully!');
-            setAccountForm({
-                username: response.username || accountForm.username,
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            });
-            setIsEditing(false);
-
-        } catch (error: unknown) {
-            console.error('Update failed:', error);
-            setSaveError(error instanceof Error ? error.message : 'Failed to update account. Please try again.');
-        } finally {
-            setSaveLoading(false);
-        }
-    };
+        setSaveSuccess(response.message);
+        setAccountForm({
+            username: response.username,
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+        setIsEditing(false);
+    } catch (error: unknown) {
+        setSaveError(error instanceof Error ? error.message : 'Update failed');
+    } finally {
+        setSaveLoading(false);
+    }
+};
 
     const resetForm = () => {
         setAccountForm({

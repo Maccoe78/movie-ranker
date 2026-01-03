@@ -24,3 +24,11 @@ export interface RatingRequest {
   rating: number;
   comment?: string;
 }
+
+export interface UserProfileStats {
+  recentReviews: Rating[];
+  reviewsCount: number;
+  averageRating: number;
+  favoriteMovies: Rating[];
+  followingCount: number;
+}

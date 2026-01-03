@@ -21,8 +21,10 @@ export interface AuthResponse {
 }
 
 export interface UpdateUserRequest {
+  currentUsername?: string;
   username?: string;
   password?: string;
+  confirmPassword?: string;
 }
 
 export interface LoginResponse {
@@ -41,3 +43,4 @@ export interface UpdateUserResponse {
   message: string;
   username: string;
 }
+

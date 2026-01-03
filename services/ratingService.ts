@@ -1,4 +1,5 @@
-import { Rating, RatingRequest, MovieRatingsResponse } from '@/types/rating';
+import { Rating, RatingRequest, MovieRatingsResponse, UserProfileStats } from '@/types/rating';
+import { getFollowing } from '@/repositories/followRepository';
 import { addOrUpdateRating as addOrUpdateRatingRepo, 
   getUserRatings, 
   getMovieRatings, 
@@ -110,4 +111,42 @@ export function formatRatingDate(dateString: string): string {
     month: 'short', 
     day: 'numeric' 
   });
+}
+
+export function parseDate(dateArray: number[] | string | null): string {
+  if (!dateArray) return 'No Date';
+
+  if (typeof dateArray === 'string') {
+    return new Date(dateArray).toLocaleDateString('nl-NL', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  return 'Invalid Date';
+}
+
+export async function getUserProfileStats(userId: number): Promise<UserProfileStats> {
+  try {
+    const [ratings, followingData] = await Promise.all([
+      getUserRatings(userId),
+      getFollowing(userId)
+    ]);
+
+    const recentReviews = getRecentReviews(ratings, 3);
+    const favoriteMovies = getHighestRatedMovies(ratings, 3);
+    const averageRating = calculateUserAverageRating(ratings);
+
+    return {
+      recentReviews,
+      reviewsCount: recentReviews.length,
+      averageRating,
+      favoriteMovies,
+      followingCount: followingData.following.length // Pas aan afhankelijk van response
+    };
+  } catch (error) {
+    console.error('RatingService: Error fetching profile stats:', error);
+    throw error;
+  }
 }
