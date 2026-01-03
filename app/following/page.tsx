@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
-import { apiClient } from '@/lib/api';
+import { getFollowingList, searchUsersToFollow, followAndRefresh, unfollowAndRefresh } from '@/services/followService';
+import { getUserInitials } from '@/services/userService';
 import Navigation from '@/components/Navigation';
 
 export default function FollowingPage() {
@@ -19,8 +20,8 @@ export default function FollowingPage() {
         const fetchFollowing = async () => {
             if (user?.id) {
                 try {
-                    const response = await apiClient.getFollowing(user.id);
-                    setFollowing(response.following);
+                    const followingList = await getFollowingList(user.id);
+                    setFollowing(followingList);
                 } catch (error) {
                     console.error('Error fetching following:', error);
                 }
@@ -30,13 +31,10 @@ export default function FollowingPage() {
     }, [user?.id]);
 
     const handleSearch = async () => {
-        if (!searchQuery.trim()) return;
+        if (!searchQuery.trim() || !user?.id) return;
         setLoading(true);
         try {
-            const results = await apiClient.searchUsers(searchQuery);
-            const filtered = results.filter(
-                u => u.id !== user?.id && !following.some(f => f.id === u.id)
-            );
+            const filtered = await searchUsersToFollow(searchQuery, user.id, following);
             setSearchResults(filtered);
         } catch (error) {
             console.error('Error searching users:', error);
@@ -49,12 +47,10 @@ export default function FollowingPage() {
         if (!user?.id) return;
 
         try {
-            await apiClient.followUser(user.id, userId);
-            const response = await apiClient.getFollowing(user.id);
-            setFollowing(response.following);
-            setSearchResults(searchResults.filter(u => u.id !== userId));
-        } catch (error) {
-            console.error('Error following user:', error);
+            const result = await followAndRefresh(user.id, userId, searchResults);
+            setFollowing(result.following);
+            setSearchResults(result.searchResults);
+        } catch {
             alert('Failed to follow user');
         }
     };
@@ -63,11 +59,9 @@ export default function FollowingPage() {
         if (!user?.id) return;
 
         try {
-            await apiClient.unfollowUser(user.id, userId);
-            const response = await apiClient.getFollowing(user.id);
-            setFollowing(response.following);
-        } catch (error) {
-            console.error('Error unfollowing user:', error);
+            const updatedList = await unfollowAndRefresh(user.id, userId);
+            setFollowing(updatedList);
+        } catch {
             alert('Failed to unfollow user');
         }
     };
@@ -117,7 +111,7 @@ export default function FollowingPage() {
                                     <div key={user.id} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                                {user.username.charAt(0).toUpperCase()}
+                                                {getUserInitials(user.username)}
                                             </div>
                                             <span className="text-white">{user.username}</span>
                                         </div>
@@ -151,7 +145,7 @@ export default function FollowingPage() {
                                 <div key={user.id} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                            {user.username.charAt(0).toUpperCase()}
+                                            {getUserInitials(user.username)}
                                         </div>
                                         <span className="text-white">{user.username}</span>
                                     </div>

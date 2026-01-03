@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+import { loginUser } from '@/services/userService';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
@@ -19,10 +19,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await apiClient.login({
-        username,
-        password,
-      });
+      const response = await loginUser(username, password);
 
       console.log('Login successful:', response);
       

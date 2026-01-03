@@ -1,0 +1,43 @@
+export interface Rating {
+  id: number;
+  userId: number;
+  movieId: number;
+  rating: number;        
+  comment?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface RatingWithUser extends Rating {
+  userName: string;
+}
+
+export interface RatingWithMovie extends Rating {
+  movie: {
+    id: number;
+    name: string;
+    posterUrl?: string;
+    releaseYear?: number;
+  };
+}
+
+export interface MovieRatingsResponse {
+  ratings: RatingWithUser[];
+  averageRating: number;
+  totalRatings: number;
+}
+
+export interface RatingRequest {
+  userId: number;
+  movieId: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface UserProfileStats {
+  recentReviews: RatingWithMovie[];
+  reviewsCount: number;
+  averageRating: number;
+  favoriteMovies: RatingWithMovie[];
+  followingCount: number;
+}
