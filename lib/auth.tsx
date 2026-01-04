@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiClient } from './api';
+import { deleteUserAccount } from '@/services/userService';
 
 interface User {
   id: number;
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   const deleteUser = async (userId: number) => {
-    await apiClient.deleteUser(userId);
+    await deleteUserAccount(userId);
     logout();
     window.location.href = '/';
   };
